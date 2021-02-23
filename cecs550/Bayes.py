@@ -43,6 +43,30 @@ def initate_data(df, column_data: int):
 
     return colDict
 
+#mu
+def calc_mean(colDict: dict):
+
+    w1 = 0
+    w2 = 0
+    w3 = 0
+
+    for k, v in colDict.items():
+        if k == "w1":
+            w1 = (sum(colDict["w1"]))
+        if k == "w2":
+            w2 = (sum(colDict["w2"]))
+        if k == "w3":
+            w3 = (sum(colDict["w3"]))
+
+    omega = {"w1" : w1, "w2": w2, "w3": w3}
+
+    return sum(omega.values())
+
+#sigma
+def calc_variance:
+    
+
+
 # likelihood ratio =
 # p(x | w1) / p (x | w2) > (lb12 - lb22 / lb21 - lb11) (P(w2) / P(w1)
 
@@ -79,8 +103,8 @@ dfTest = load_data("HW2-TrainData.csv")
 # print(type(dfTest.iloc[:, 3].values[0]))
 #
 
-print(initate_data(dfTest, 1))
-
+colDict = initate_data(dfTest, 1)
+print(calc_mean(colDict))
 
 
 # def initate_data(file_name):
