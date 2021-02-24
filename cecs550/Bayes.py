@@ -1,6 +1,8 @@
 import pandas as pd
 import csv
 import os
+from collections import defaultdict
+import math
 
 
 # gi(X) = ln(p(X | wi)) + ln(P(wi))
@@ -20,51 +22,124 @@ def load_data(file_name):
 
 #df = data_frame
 #column_data = 0, 1, 2
-def initate_data(df, column_data: int):
+# def initate_data(df, column_data: int):
+#
+#     df_colSearch = df.iloc[:, column_data]
+#     df_colAssignment_values = df.iloc[:, 3]
+#
+#     print(df_colSearch)
+#
+#     w1Col_data = []
+#     w2Col_data = []
+#     w3Col_data = []
+#
+#     x1 = []
+#     x2 = []
+#     x3 = []
+#
+#
+#     for i in range(len(dfTest)):
+#         if df_colAssignment_values[i] == "w1":
+#             w1Col_data.append(df_colSearch[i])
+#
+#         if df_colAssignment_values[i] == "w2":
+#             w2Col_data.append(df_colSearch[i])
+#
+#         if df_colAssignment_values[i] == "w3":
+#             w3Col_data.append(df_colSearch[i])
+#
+#     colDict = {"w1": w1Col_data, "w2": w2Col_data, "w3": w3Col_data}
+#
+#     return colDict
 
-    df_colSearch = df.iloc[:, column_data]
-    df_colAssignment_values = df.iloc[:, 3]
+def initate_data(df):
+    df_firstCol = df.iloc[:, 0].values
+    df_secondCol = df.iloc[:, 1].values
+    df_third_col = df.iloc[:, 2].values
+    df_colAssignment_values = df.iloc[:, 3].values
 
-    w1Col_data = []
-    w2Col_data = []
-    w3Col_data = []
+    w1_col1_idx = []
+    w2_col1_idx = []
+    w3_col1_idx = []
+
+    w1_col2_idx = []
+    w2_col2_idx = []
+    w3_col2_idx = []
+
+    w1_col3_idx = []
+    w2_col3_idx = []
+    w3_col3_idx = []
 
     for i in range(len(df_colAssignment_values)):
         if df_colAssignment_values[i] == "w1":
-            w1Col_data.append(df_colSearch[i])
+            w1_col1_idx.append(df_firstCol[i])
+            w1_col2_idx.append(df_secondCol[i])
+            w1_col3_idx.append(df_third_col[i])
 
         if df_colAssignment_values[i] == "w2":
-            w2Col_data.append(df_colSearch[i])
+            w2_col1_idx.append(df_firstCol[i])
+            w2_col2_idx.append(df_secondCol[i])
+            w2_col3_idx.append(df_third_col[i])
 
         if df_colAssignment_values[i] == "w3":
-            w3Col_data.append(df_colSearch[i])
+            w3_col1_idx.append(df_firstCol[i])
+            w3_col2_idx.append(df_secondCol[i])
+            w3_col3_idx.append(df_third_col[i])
 
-    colDict = {"w1": w1Col_data, "w2": w2Col_data, "w3": w3Col_data}
+    colDict = {"w1": [w1_col1_idx, w1_col2_idx, w1_col3_idx],
+               "w2": [w2_col1_idx, w2_col2_idx, w2_col3_idx], "w3": [w3_col1_idx, w3_col2_idx, w3_col3_idx ]}
 
     return colDict
 
 #mu
 def calc_mean(colDict: dict):
 
-    w1 = 0
-    w2 = 0
-    w3 = 0
+    w1 = []
+    w2 = []
+    w3 = []
 
     for k, v in colDict.items():
         if k == "w1":
-            w1 = (sum(colDict["w1"]))
+            for i in range(len(v)):
+                w1.append(sum(v[i])/len(v[i]))
         if k == "w2":
-            w2 = (sum(colDict["w2"]))
+            for i in range(len(v)):
+                w2.append(sum(v[i])/len(v[i]))
         if k == "w3":
-            w3 = (sum(colDict["w3"]))
+            for i in range((len(v))):
+                w3.append(sum(v[i])/len(v[i]))
 
     omega = {"w1" : w1, "w2": w2, "w3": w3}
 
-    return sum(omega.values())
+    return omega
 
 #sigma
-def calc_variance:
-    
+def calc_standardDev(colDict: dict, df):
+
+    data = initate_data(df)
+    mean = calc_mean(colDict)
+
+    n = 0
+
+    for k, v in data.items():
+        n = len(v[0])
+        break
+
+    standardDev = defaultdict(list)
+
+    for k, v in data.items():
+        counter = 0
+        for i in v:
+            nums = 0
+            for j in range(len(i)):
+                nums += ((i[j] - mean[k][counter]) ** 2)
+            counter += 1
+            variance = nums / (n-1)
+            standardDev[k].append(math.sqrt(variance))
+
+    #converting back to normal dict
+    standardDev = dict(standardDev)
+    return standardDev
 
 
 # likelihood ratio =
@@ -99,12 +174,15 @@ def calc_bayes():
 
 
 dfTest = load_data("HW2-TrainData.csv")
+# print(dfTest.columns)
 # print(dfTest.iloc[:,3])
 # print(type(dfTest.iloc[:, 3].values[0]))
 #
 
-colDict = initate_data(dfTest, 1)
-print(calc_mean(colDict))
+colDict = initate_data(dfTest)
+# print(colDict)
+# print(calc_mean(colDict))
+print(calc_standardDev(colDict, dfTest))
 
 
 # def initate_data(file_name):
