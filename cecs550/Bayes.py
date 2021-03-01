@@ -258,7 +258,7 @@ def calc_MultivariateDistribution(X, mu, covarianceMatrix, covarianceMatrixDeriv
     #     print(possibilities[i][1])
 
     print(len(possibilities))
-
+    counter = 0
     indx = list(X)
     print(indx)
 
@@ -279,7 +279,7 @@ def calc_MultivariateDistribution(X, mu, covarianceMatrix, covarianceMatrixDeriv
 
                     print("\n")
 
-                    print("Variance: ", variance[k][possibilities[l][1]])
+                    print("covariance: ", variance[k][possibilities[l][1]])
                     print("Mean: ", mu[k][possibilities[l][1]])
                     print("X: ", X[k][i][j])
 
@@ -289,7 +289,8 @@ def calc_MultivariateDistribution(X, mu, covarianceMatrix, covarianceMatrixDeriv
                                          possibilities[i][1]]))) * omega[1]
 
                     print("dist2: ", multivarDist2)
-
+                    counter+=1
+                    print("counter: ", counter)
 
             # multivarDist1 = (1. / np.sqrt((2 * np.pi) ** d * np.linalg.det(covarianceMatrix[k][possibilities[i][0], possibilities[i][0]:]))) * np.exp(
             #      -0.5 * np.subtract(X[k], mu[k][possibilities[i][0], possibilities[i][0]:]).T * covarianceMatrixDeriv[k][possibilities[i][0], possibilities[i][0]:] * (X[k][possibilities[i][0], possibilities[i][0]:] - mu[k][possibilities[i][0], possibilities[i][0]:]))
@@ -372,7 +373,7 @@ covarianceMatrixDeriv = createCovarianceMatrixDeriv(covariance, d)
 
 omega = np.array([0.5, 0.5, 0])
 
-multivariate = calc_MultivariateDistribution(colDict_test, mean, covarianceMatrix, covarianceMatrixDeriv, 3, variance, omega)
+multivariate = calc_MultivariateDistribution(colDict_test, mean, covarianceMatrix, covarianceMatrixDeriv, 3, covariance, omega)
 print("Multivariate: ", multivariate, "\n")
 #
 # omega = np.array([0.5, 0.5, 0])
