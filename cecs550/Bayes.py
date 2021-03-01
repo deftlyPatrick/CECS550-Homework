@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import numpy as np
+import itertools
 
 
 def load_data(file_name):
@@ -215,23 +216,96 @@ def createCovarianceMatrixDeriv(varianceDict: dict, d):
 
     return covarianceMatrixDict
 
+# def splitMatrix(X, mu, covarianceMatrix, covarianceMatrixDeriv):
+
+
 # X = test data set - column
 # mu = mean
 # sigma = covariance
 # d = columns
-def calc_MultivariateDistribution(X, mu, covarianceMatrix, covarianceMatrixDeriv, d):
-    x_m = {}
 
-    for k, v in X.items():
-        x_m[k] = np.subtract(X[k], mu[k])
+#p(x1, x2, x3 | w1)
+#p(x1, x2, x3 | w2)
+
+#p(x1, x2, x3 | w1)
+#p(x1, x2  x3 | w3)
+
+#p(x1, x2, x3 | w2)
+#p(x1  x2  x3 | w3)
+
+def calc_MultivariateDistribution(X, mu, covarianceMatrix, covarianceMatrixDeriv, d, variance, omega):
+
+
+    possibilitiesUnsorted = list(itertools.permutations(list(range(0, d)), 2))
+
+    possibilities = []
+    for i in range(len(possibilitiesUnsorted)):
+        for k in range(len(possibilitiesUnsorted[i])):
+            if possibilitiesUnsorted[i][k] > possibilitiesUnsorted[i][k + 1]:
+                break
+            else:
+                possibilities.append(possibilitiesUnsorted[i])
+                break
+
+    print(possibilities)
 
     multiDict = {}
 
-    for k, v in x_m.items():
-        multivarDist = (1. / np.sqrt((2 * np.pi) ** d * np.linalg.det(covarianceMatrix[k]))) * np.exp(
-            -0.5*np.linalg.solve(covarianceMatrix[k], x_m[k]).T.dot(x_m[k]))
-        multiDict[k] = multivarDist
+    # print(X)
+    #
+    # for i in range(len(possibilities)):
+    #     print(possibilities[i][0])
+    #     print(possibilities[i][1])
 
+    print(len(possibilities))
+
+    indx = list(X)
+    print(indx)
+
+    for k, v in X.items():
+        for i in range(len(v)):
+            for j in range(len(v[i])):
+                for l in range(len(possibilities)):
+                    print(
+                        "------------------------------------------------------------------------------------------------------")
+                    print("Variance: ", variance[k][possibilities[l][0]])
+                    print("Mean: ",  mu[k][possibilities[l][0]])
+                    print("X: ", X[k][i][j])
+
+                    multivarDist1 = ((1. / np.sqrt(2 * np.pi * variance[k][possibilities[l][0]])) *
+                        np.exp(-(((X[k][i][j] - mu[k][possibilities[l][0]])**2)/2 * variance[k][possibilities[i][0]]))) * omega[0]
+
+                    print("dist1: ", multivarDist1)
+
+                    print("\n")
+
+                    print("Variance: ", variance[k][possibilities[l][1]])
+                    print("Mean: ", mu[k][possibilities[l][1]])
+                    print("X: ", X[k][i][j])
+
+                    nextIdx = indx.index(k) + 1
+                    multivarDist2 = ((1. / np.sqrt(2 * np.pi * variance[indx[nextIdx]][possibilities[l][1]])) *
+                                     np.exp(-(((X[k][i][j] - mu[indx[nextIdx]][possibilities[l][1]]) ** 2) / 2 * variance[indx[nextIdx]][
+                                         possibilities[i][1]]))) * omega[1]
+
+                    print("dist2: ", multivarDist2)
+
+
+            # multivarDist1 = (1. / np.sqrt((2 * np.pi) ** d * np.linalg.det(covarianceMatrix[k][possibilities[i][0], possibilities[i][0]:]))) * np.exp(
+            #      -0.5 * np.subtract(X[k], mu[k][possibilities[i][0], possibilities[i][0]:]).T * covarianceMatrixDeriv[k][possibilities[i][0], possibilities[i][0]:] * (X[k][possibilities[i][0], possibilities[i][0]:] - mu[k][possibilities[i][0], possibilities[i][0]:]))
+            #
+            # multivarDist2 = (1. / np.sqrt((2 * np.pi) ** d * np.linalg.det(covarianceMatrix[k][possibilities[i][1], possibilities[i][1]:]))) * np.exp(
+            #     -0.5 * np.subtract(X[k], mu[k][possibilities[i][1], possibilities[i][1]:]).T * covarianceMatrixDeriv[k][possibilities[i][1], possibilities[i][1]:] * (X[k][possibilities[i][1], possibilities[i][1]:] - mu[k][possibilities[i][1], possibilities[i][1]:]))
+
+            print("\n\n\n")
+            print("------------------------------------------------------------------------------------------------------")
+
+            if multivarDist1 > multivarDist2:
+                multiDict[k] = multivarDist1
+            else:
+                multiDict[k] = multivarDist2
+
+            # multiDict[k] = multivarDist
     return multiDict
 
 
@@ -240,13 +314,13 @@ def calc_MultivariateDistribution(X, mu, covarianceMatrix, covarianceMatrixDeriv
 
 # p(A | B) = P(B | A) * P(A) / P(B)
 
-def calc_likelihood(multiDict, omega):
-    likelihood = {}
-
-    for k, v in multiDict.items():
-        likelihood[k] = np.multiply(multiDict[k], omega)
-
-    return likelihood
+# def calc_likelihood(multiDict, omega):
+#     likelihood = {}
+#
+#     for k, v in multiDict.items():
+#         likelihood[k] = np.multiply(multiDict[k], omega)
+#
+#     return likelihood
 
 
 # class priors =
@@ -259,13 +333,13 @@ def calc_likelihood(multiDict, omega):
 # bayes = [ posterior =  likelihood * prior / evidence ]
 
 # P(w | X) = P(X | w) P(w) / P(X)
-def calc_bayes(multiDict: dict, X: dict, omega):
-    bayes = {}
-
-    for k, v in multiDict.items():
-        bayes[k] = (np.multiply(multiDict[k], omega))
-
-    return bayes
+# def calc_bayes(multiDict: dict, X: dict, omega):
+#     bayes = {}
+#
+#     for k, v in multiDict.items():
+#         bayes[k] = (np.multiply(multiDict[k], omega))
+#
+#     return bayes
 
 
 ##################################################################
@@ -298,7 +372,7 @@ covarianceMatrixDeriv = createCovarianceMatrixDeriv(covariance, d)
 
 omega = np.array([0.5, 0.5, 0])
 
-multivariate = calc_MultivariateDistribution(colDict_test, mean, covarianceMatrix, covarianceMatrixDeriv, d)
+multivariate = calc_MultivariateDistribution(colDict_test, mean, covarianceMatrix, covarianceMatrixDeriv, 3, variance, omega)
 print("Multivariate: ", multivariate, "\n")
 #
 # omega = np.array([0.5, 0.5, 0])
