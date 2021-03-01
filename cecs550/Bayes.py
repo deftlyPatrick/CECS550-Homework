@@ -1,32 +1,21 @@
 import pandas as pd
-import csv
 import os
-from collections import defaultdict
-import math
 import numpy as np
-from functools import partial
 
-# gi(X) = ln(p(X | wi)) + ln(P(wi))
-# if gi(X) > gj(x) for all i != j then X is in the region
-
-
-# P(w1) = P(w2) = 1/2
-# P(w3) = 0
 
 def load_data(file_name):
-
     pwd = os.path.abspath(os.getcwd())
     os.chdir("..")
 
-    #gets the csv file path
+    # gets the csv file path
     csv_path = os.path.abspath(os.getcwd()) + "/" + file_name
 
     # print(csv_path)
 
-    #stores the dataframe of the csv file
+    # stores the dataframe of the csv file
     df = pd.read_csv(csv_path)
 
-    #returns back to original directory
+    # returns back to original directory
     os.chdir(pwd)
     return df
 
@@ -66,15 +55,16 @@ def initiate_data(df):
             w3_col3_idx.append(df_third_col[i])
 
     colDict = {"w1": [w1_col1_idx, w1_col2_idx, w1_col3_idx],
-               "w2": [w2_col1_idx, w2_col2_idx, w2_col3_idx], "w3": [w3_col1_idx, w3_col2_idx, w3_col3_idx ]}
+               "w2": [w2_col1_idx, w2_col2_idx, w2_col3_idx], "w3": [w3_col1_idx, w3_col2_idx, w3_col3_idx]}
 
     for k, v in colDict.items():
         colDict[k] = np.array(v)
 
     return colDict
-#mu
-def calc_mean(colDict: dict):
 
+
+# mu
+def calc_mean(colDict: dict):
     dim = (len(colDict), 1)
 
     w1 = np.zeros(dim)
@@ -84,7 +74,7 @@ def calc_mean(colDict: dict):
     for k, v in colDict.items():
         if k == "w1":
             for i in range(len(v)):
-                temp = np.array(sum(v[i])/len(v[i]))
+                temp = np.array(sum(v[i]) / len(v[i]))
                 for j in range(len(w1)):
                     if w1[j] == 0:
                         w1[j] = temp
@@ -104,13 +94,12 @@ def calc_mean(colDict: dict):
                         w3[j] = temp
                         break
 
-
     mu = {"w1": w1, "w2": w2, "w3": w3}
 
     return mu
 
-def calc_variance(colDict: dict, df):
 
+def calc_variance(colDict: dict, df):
     data = initiate_data(df)
     mean = calc_mean(colDict)
 
@@ -143,12 +132,11 @@ def calc_variance(colDict: dict, df):
                         break
                     break
 
-
     return varianceDict
 
-#sigma
-def calc_covariance(colDict: dict, df):
 
+# sigma
+def calc_covariance(colDict: dict, df):
     data = initiate_data(df)
     mean = calc_mean(colDict)
 
@@ -182,16 +170,13 @@ def calc_covariance(colDict: dict, df):
                         break
                     break
 
-
     return covarianceDict
 
 
-
 def createCovarianceMatrix(varianceDict: dict, d):
-
     covarianceMatrixDict = {}
 
-    for k,v in varianceDict.items():
+    for k, v in varianceDict.items():
         tempList = []
         dim = (d, d)
         covarianceMatrix = np.zeros(dim)
@@ -207,6 +192,26 @@ def createCovarianceMatrix(varianceDict: dict, d):
                 tempList.append(a)
             covarianceMatrixDict[k] = covarianceMatrix
 
+    return covarianceMatrixDict
+
+def createCovarianceMatrixDeriv(varianceDict: dict, d):
+    covarianceMatrixDict = {}
+
+    for k, v in varianceDict.items():
+        tempList = []
+        dim = (d, d)
+        covarianceMatrix = np.zeros(dim)
+        counter = 0
+        for a in v:
+            if len(tempList) != d:
+                for i in range(len(covarianceMatrix)):
+                    if covarianceMatrix[counter][counter] == 0:
+                        covarianceMatrix[counter][counter] = 1/a
+                        counter += 1
+                        # print(covarianceMatrix)
+                        break
+                tempList.append(a)
+            covarianceMatrixDict[k] = covarianceMatrix
 
     return covarianceMatrixDict
 
@@ -214,21 +219,17 @@ def createCovarianceMatrix(varianceDict: dict, d):
 # mu = mean
 # sigma = covariance
 # d = columns
-def calc_MultivarianeDistribution(X, mu, covarianceMatrix, d):
-
+def calc_MultivariateDistribution(X, mu, covarianceMatrix, covarianceMatrixDeriv, d):
     x_m = {}
 
     for k, v in X.items():
         x_m[k] = np.subtract(X[k], mu[k])
 
-    dim = (d, d)
-    dimOfD = np.ones(dim)
     multiDict = {}
 
-    listOfPossibilites = np.array([[1,2], [1,3], [2,3]])
     for k, v in x_m.items():
-
-        multivarDist = (1. / np.sqrt((2 * np.pi) ** 3 * np.linalg.det(covarianceMatrix[k]))) * np.exp(-(np.linalg.solve(covarianceMatrix[k], x_m[k]).T.dot(x_m[k])/2))
+        multivarDist = (1. / np.sqrt((2 * np.pi) ** d * np.linalg.det(covarianceMatrix[k]))) * np.exp(
+            -0.5*np.linalg.solve(covarianceMatrix[k], x_m[k]).T.dot(x_m[k]))
         multiDict[k] = multivarDist
 
     return multiDict
@@ -242,7 +243,7 @@ def calc_MultivarianeDistribution(X, mu, covarianceMatrix, d):
 def calc_likelihood(multiDict, omega):
     likelihood = {}
 
-    for k,v in multiDict.items():
+    for k, v in multiDict.items():
         likelihood[k] = np.multiply(multiDict[k], omega)
 
     return likelihood
@@ -250,22 +251,22 @@ def calc_likelihood(multiDict, omega):
 
 # class priors =
 # (lb21 - lb11) * p(x | w1) * P(w1) > (lb12 - lb22) p(x | w2) * P(w2)
-def calc_prior():
-    prior = 0
-    return prior
+# def calc_prior():
+#     prior = 0
+#     return prior
 
 
 # bayes = [ posterior =  likelihood * prior / evidence ]
 
-#P(w | X) = P(X | w) P(w) / P(X)
+# P(w | X) = P(X | w) P(w) / P(X)
 def calc_bayes(multiDict: dict, X: dict, omega):
-
     bayes = {}
 
     for k, v in multiDict.items():
         bayes[k] = (np.multiply(multiDict[k], omega))
 
     return bayes
+
 
 ##################################################################
 dfTrain = load_data("HW2-TrainData.csv")
@@ -290,14 +291,19 @@ print("Variance: ", variance, "\n")
 print("Covariance: ", covariance, "\n")
 
 covarianceMatrix = createCovarianceMatrix(covariance, d)
+covarianceMatrixDeriv = createCovarianceMatrixDeriv(covariance, d)
 
-multivariate = calc_MultivarianeDistribution(colDict_test, mean, covarianceMatrix, d)
-print("Multivariate: ", multivariate, "\n")
+# print(covarianceMatrix)
+# print(covarianceMatrixDeriv)
 
 omega = np.array([0.5, 0.5, 0])
-likelihood = calc_likelihood(multivariate, omega)
-print("Likelihood: ", likelihood, "\n")
 
-bayes = calc_bayes(likelihood, colDict_test, omega)
-print("Bayes: ", bayes, "\n")
-
+multivariate = calc_MultivariateDistribution(colDict_test, mean, covarianceMatrix, covarianceMatrixDeriv, d)
+print("Multivariate: ", multivariate, "\n")
+#
+# omega = np.array([0.5, 0.5, 0])
+# likelihood = calc_likelihood(multivariate, omega)
+# print("Likelihood: ", likelihood, "\n")
+#
+# bayes = calc_bayes(likelihood, colDict_test, omega)
+# print("Bayes: ", bayes, "\n")
