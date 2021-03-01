@@ -292,6 +292,11 @@ def calc_MultivariateDistribution(X, mu, covarianceMatrix, covarianceMatrixDeriv
                     counter+=1
                     print("counter: ", counter)
 
+                    if multivarDist1 > multivarDist2:
+                        multiDict[k] = multivarDist1
+                    else:
+                        multiDict[k] = multivarDist2
+
             # multivarDist1 = (1. / np.sqrt((2 * np.pi) ** d * np.linalg.det(covarianceMatrix[k][possibilities[i][0], possibilities[i][0]:]))) * np.exp(
             #      -0.5 * np.subtract(X[k], mu[k][possibilities[i][0], possibilities[i][0]:]).T * covarianceMatrixDeriv[k][possibilities[i][0], possibilities[i][0]:] * (X[k][possibilities[i][0], possibilities[i][0]:] - mu[k][possibilities[i][0], possibilities[i][0]:]))
             #
@@ -301,10 +306,6 @@ def calc_MultivariateDistribution(X, mu, covarianceMatrix, covarianceMatrixDeriv
             print("\n\n\n")
             print("------------------------------------------------------------------------------------------------------")
 
-            if multivarDist1 > multivarDist2:
-                multiDict[k] = multivarDist1
-            else:
-                multiDict[k] = multivarDist2
 
             # multiDict[k] = multivarDist
     return multiDict
