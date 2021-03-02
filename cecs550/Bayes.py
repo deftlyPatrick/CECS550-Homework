@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 import pandas as pd
 import os
 import numpy as np
@@ -249,7 +251,7 @@ def calc_MultivariateDistribution(X, mu, covarianceMatrix, covarianceMatrixDeriv
 
     print(possibilities)
 
-    multiDict = {}
+    multiDict = defaultdict(list)
 
     # print(X)
     #
@@ -259,6 +261,8 @@ def calc_MultivariateDistribution(X, mu, covarianceMatrix, covarianceMatrixDeriv
 
     print(len(possibilities))
     counter = 0
+    appendCounter = 0
+
     indx = list(X)
     print(indx)
 
@@ -266,36 +270,51 @@ def calc_MultivariateDistribution(X, mu, covarianceMatrix, covarianceMatrixDeriv
         for i in range(len(v)):
             for j in range(len(v[i])):
                 for l in range(len(possibilities)):
-                    print(
-                        "------------------------------------------------------------------------------------------------------")
-                    print("Variance: ", variance[k][possibilities[l][0]])
-                    print("Mean: ",  mu[k][possibilities[l][0]])
-                    print("X: ", X[k][i][j])
+                    # print(
+                        # "------------------------------------------------------------------------------------------------------")
 
-                    multivarDist1 = ((1. / np.sqrt(2 * np.pi * variance[k][possibilities[l][0]])) *
-                        np.exp(-(((X[k][i][j] - mu[k][possibilities[l][0]])**2)/2 * variance[k][possibilities[i][0]]))) * omega[0]
 
-                    print("dist1: ", multivarDist1)
+                    # print("covariance: ", variance[k][possibilities[l][0]])
+                    # print("mean: ", mu[k][possibilities[l][0]])
+                    # print("X: ", X[k][i][j])
 
-                    print("\n")
+                    # multivarDist1 = ((1. / np.sqrt(2 * np.pi * (variance[k][possibilities[l][0]] ** 2))) *
+                    #     np.exp(-(((X[k][i][j] + mu[k][possibilities[l][0]])**2)/2 * (variance[k][possibilities[i][0]] ** 2)))) * omega[0]
 
-                    print("covariance: ", variance[k][possibilities[l][1]])
-                    print("Mean: ", mu[k][possibilities[l][1]])
-                    print("X: ", X[k][i][j])
+                    multivarDist1 =  1. /(np.sqrt(2 * np.pi) * variance[k][possibilities[l][0]]) * \
+                                     np.exp(-0.5 * ((X[k][i][j] - mu[k][possibilities[l][0]])/variance[k][possibilities[i][0]]) ** 2) * omega[0]
 
-                    nextIdx = indx.index(k) + 1
-                    multivarDist2 = ((1. / np.sqrt(2 * np.pi * variance[indx[nextIdx]][possibilities[l][1]])) *
-                                     np.exp(-(((X[k][i][j] - mu[indx[nextIdx]][possibilities[l][1]]) ** 2) / 2 * variance[indx[nextIdx]][
-                                         possibilities[i][1]]))) * omega[1]
+                    # print("dist1: ", multivarDist1)
 
-                    print("dist2: ", multivarDist2)
+
+
+                    # print("\n")
+
+                    if indx.index(k) + 1 != len(indx):
+                        nextIdx = indx.index(k) + 1
+                    else:
+                        nextIdx = indx.index(k)
+                    # print("covariance: ", variance[indx[nextIdx]][possibilities[l][1]])
+                    # print("mean: ", mu[indx[nextIdx]][possibilities[l][1]])
+                    # print("X: ", X[k][i][j])
+
+                    multivarDist2 = 1. /(np.sqrt(2 * np.pi) * variance[indx[nextIdx]][possibilities[l][0]]) * \
+                                    np.exp(-0.5 * ((X[k][i][j] - mu[indx[nextIdx]][possibilities[l][0]])/variance[indx[nextIdx]][possibilities[i][0]]) ** 2) * omega[1]
+
+                    # print("dist2: ", multivarDist2)
                     counter+=1
-                    print("counter: ", counter)
+                    # print("counter: ", counter)
 
                     if multivarDist1 > multivarDist2:
-                        multiDict[k] = multivarDist1
+                        multiDict[k].append(multivarDist1)
+                        # print("APPEND: ", multivarDist1)
+                        appendCounter += 1
                     else:
-                        multiDict[k] = multivarDist2
+                        multiDict[k].append(multivarDist2)
+                        # print("APPEND: ", multivarDist2)
+                        appendCounter += 1
+
+                    # print("appendCounter: ", appendCounter)
 
             # multivarDist1 = (1. / np.sqrt((2 * np.pi) ** d * np.linalg.det(covarianceMatrix[k][possibilities[i][0], possibilities[i][0]:]))) * np.exp(
             #      -0.5 * np.subtract(X[k], mu[k][possibilities[i][0], possibilities[i][0]:]).T * covarianceMatrixDeriv[k][possibilities[i][0], possibilities[i][0]:] * (X[k][possibilities[i][0], possibilities[i][0]:] - mu[k][possibilities[i][0], possibilities[i][0]:]))
@@ -303,12 +322,15 @@ def calc_MultivariateDistribution(X, mu, covarianceMatrix, covarianceMatrixDeriv
             # multivarDist2 = (1. / np.sqrt((2 * np.pi) ** d * np.linalg.det(covarianceMatrix[k][possibilities[i][1], possibilities[i][1]:]))) * np.exp(
             #     -0.5 * np.subtract(X[k], mu[k][possibilities[i][1], possibilities[i][1]:]).T * covarianceMatrixDeriv[k][possibilities[i][1], possibilities[i][1]:] * (X[k][possibilities[i][1], possibilities[i][1]:] - mu[k][possibilities[i][1], possibilities[i][1]:]))
 
-            print("\n\n\n")
-            print("------------------------------------------------------------------------------------------------------")
+            # print("\n\n\n")
+            # print("------------------------------------------------------------------------------------------------------")
 
+            newDict = dict(multiDict)
 
-            # multiDict[k] = multivarDist
-    return multiDict
+            for k, v in newDict.items():
+                newDict[k] = np.array(v)
+
+    return newDict
 
 
 # likelihood ratio =
