@@ -255,13 +255,13 @@ def calc_UnivariateDistribution(X, mu, d, variance, omega):
         for i in range(len(v)):
             for j in range(len(v[i])):
                 for l in range(len(possibilities)):
-                    # print(
-                        # "------------------------------------------------------------------------------------------------------")
+                    print(
+                        "------------------------------------------------------------------------------------------------------")
 
 
-                    # print("covariance: ", variance[k][possibilities[l][0]])
-                    # print("mean: ", mu[k][possibilities[l][0]])
-                    # print("X: ", X[k][i][j])
+                    print("covariance: ", variance[k][possibilities[l][0]])
+                    print("mean: ", mu[k][possibilities[l][0]])
+                    print("X: ", X[k][i][j])
 
                     # multivarDist1 = ((1. / np.sqrt(2 * np.pi * (variance[k][possibilities[l][0]] ** 2))) *
                     #     np.exp(-(((X[k][i][j] + mu[k][possibilities[l][0]])**2)/2 * (variance[k][possibilities[i][0]] ** 2)))) * omega[0]
@@ -271,7 +271,8 @@ def calc_UnivariateDistribution(X, mu, d, variance, omega):
 
                     # print("dist1: ", multivarDist1)
 
-
+                    print(
+                        "---------------------------------------")
 
                     # print("\n")
 
@@ -279,18 +280,18 @@ def calc_UnivariateDistribution(X, mu, d, variance, omega):
                         nextIdx = indx.index(k) + 1
                     else:
                         nextIdx = indx.index(k)
-                    # print("covariance: ", variance[indx[nextIdx]][possibilities[l][1]])
-                    # print("mean: ", mu[indx[nextIdx]][possibilities[l][1]])
-                    # print("X: ", X[k][i][j])
+                    print("covariance: ", variance[indx[nextIdx]][possibilities[l][1]])
+                    print("mean: ", mu[indx[nextIdx]][possibilities[l][1]])
+                    print("X: ", X[k][i][j])
 
                     multivarDist2 = 1. /(np.sqrt(2 * np.pi) * variance[indx[nextIdx]][possibilities[l][0]]) * \
                                     np.exp(-0.5 * ((X[k][i][j] - mu[indx[nextIdx]][possibilities[l][0]])/variance[indx[nextIdx]][possibilities[i][0]]) ** 2) * omega[1]
 
-                    # print("dist2: ", multivarDist2)
+                    print("dist2: ", multivarDist2)
                     counter+=1
                     # print("counter: ", counter)
 
-                    if multivarDist1 > multivarDist2:
+                    if multivarDist1 >= multivarDist2:
                         multiDict[(k, X[k][i][j])].append(multivarDist1)
                         # print("APPEND: ", multivarDist1)
                         appendCounter += 1
@@ -299,7 +300,8 @@ def calc_UnivariateDistribution(X, mu, d, variance, omega):
                             # .append([multivarDist2])
                         # print("APPEND: ", multivarDist2)
                         appendCounter += 1
-
+                    print(
+                        "------------------------------------------------------------------------------------------------------")
                     # print("appendCounter: ", appendCounter)
 
             # multivarDist1 = (1. / np.sqrt((2 * np.pi) ** d * np.linalg.det(covarianceMatrix[k][possibilities[i][0], possibilities[i][0]:]))) * np.exp(
@@ -311,13 +313,10 @@ def calc_UnivariateDistribution(X, mu, d, variance, omega):
             # print("\n\n\n")
             # print("------------------------------------------------------------------------------------------------------")
 
-            # newDict = dict(multiDict)
-            #
-            # for k, v in newDict.items():
-                   
-            #     newDict[k] = np.array(v)
-
-    return multiDict
+    newDict = dict(multiDict)
+    for k, v in newDict.items():
+        newDict[k] = np.array([np.product(v)])
+    return newDict
 
 # X = test data set - column
 # mu = mean
