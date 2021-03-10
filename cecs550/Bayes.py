@@ -297,8 +297,8 @@ def calc_UnivariateDistribution(X, mu, d, variance, omega):
                     # print("mean: ", mu[indx[nextIdx]][possibilities[l][1]])
                     # print("X: ", X[k][i][j])
 
-                    multivarDist2 = 1. /(np.sqrt(2 * np.pi) * variance[indx[nextIdx]][possibilities[l][0]]) * \
-                                    np.exp(-0.5 * ((X[k][i][j] - mu[indx[nextIdx]][possibilities[l][0]])/variance[indx[nextIdx]][possibilities[i][0]]) ** 2) * omega[k]
+                    multivarDist2 = 1. /(np.sqrt(2 * np.pi) * variance[indx[nextIdx]][possibilities[l][1]]) * \
+                                    np.exp(-0.5 * ((X[k][i][j] - mu[indx[nextIdx]][possibilities[l][1]])/variance[indx[nextIdx]][possibilities[i][1]]) ** 2) * omega[k]
 
                     # print("dist2: ", multivarDist2)
                     counter+=1
@@ -477,6 +477,11 @@ def calc_bayes(X_test:dict, X_norm: dict, omega:float, ):
         # print("X_norm: ", X_norm[k])
         # print("X_test: ", X_test[k])
         bayes[k] = (np.multiply(X_norm[k], omega[k[1]])/X_test[k])
+        # print("\n\n")
+
+    print("Bayes: ", bayes)
+    for k,v in bayes.items():
+        bayes[k] = np.array([np.product(v)])
 
     return bayes
 
@@ -517,28 +522,35 @@ def createErrorX(bayesResult: dict):
 
     return returnErrorX
 
-# def determineError(bayesResult: dict):
-#     tempWinnerOne = 0
-#     tempWinnerTwo = 0
-#     errorCounter = 0
-#     tempValue = 0
-#     tempValueTwo = 0
-#
-#     labels = set()
-#
-#     for k, v in bayesResult.items():
-#         labels.add(k[1])
-#
-#     for k, v in bayesResult.items():
-#         tempValue = v
-#
-#         if labels.index(k) + 1 != len(labels):
-#             nextIdx = labels.index(k) + 1
-#         else:
-#             nextIdx = labels.index(k)
-#
-#         tempValueTwo = labels[nextIdx]
+def determineError(bayesResult: dict, labels):
+    a = np.array([])
 
+    for k, v in bayesResult.items():
+        a = np.append(a, np.array(v))
+
+    a = np.reshape(a, (3, 3))
+
+    dictTemp = {}
+
+    error = 0
+    correct = 0
+
+    for i in range(len(a)):
+        for k in range(len(a[i])):
+            dictTemp[(i, k)] = a[i][k]
+
+    print(dictTemp)
+
+    possibilities = [((0,0),(0,1)), ((0,0), (0,2)) , ((1,0), (1,1)), ((1,0), (1,2)), ((2, 0), (2, 1)), ((2,0), (2,2)), ((0,1), (0,2)), ((1,1), (1,2)) , ((2,1), (2,2))]
+
+    for k, v in dictTemp.items():
+        for i in len(possibilities):
+            dictTemp[possibilities[0]] 
+
+    # a = [correct, error]
+
+
+    return a
 ##################################################################
 dfTrain = load_data("HW2-TrainData.csv")
 dfTest = load_data("HW2-TestData.csv")
@@ -573,6 +585,7 @@ covarianceMatrixDeriv = createCovarianceMatrixDeriv(covariance, d)
 # print(covarianceMatrixDeriv)
 
 omega = {'w1': 0.5, 'w2': 0.5, 'w3': 0}
+labels = list(colDict_test)
 
 univariate = calc_UnivariateDistribution(colDict_test, mean, 3, covariance, omega)
 print("Univariate: ", univariate, "\n")
@@ -583,8 +596,8 @@ print("X_normalDist: ", X_norm)
 bayes = calc_bayes(X_test, X_norm, omega)
 print("Bayes: ", bayes, "\n")
 
-# error = determineError(bayes)
-# print("Error: ", error)
+error = determineError(bayes, labels)
+print("Error: ", error)
 
 # multivariate = calc_MultivariateDistribution(colDict_train, mean, covarianceMatrix, covarianceMatrixDeriv, 3, covariance, omega)
 # print("Multivariate: ", multivariate, "\n")
