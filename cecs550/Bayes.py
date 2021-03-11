@@ -539,18 +539,71 @@ def determineError(bayesResult: dict, labels):
         for k in range(len(a[i])):
             dictTemp[(i, k)] = a[i][k]
 
-    print(dictTemp)
+    # print(dictTemp)
 
-    possibilities = [((0,0),(0,1)), ((0,0), (0,2)) , ((1,0), (1,1)), ((1,0), (1,2)), ((2, 0), (2, 1)), ((2,0), (2,2)), ((0,1), (0,2)), ((1,1), (1,2)) , ((2,1), (2,2))]
+    possibilities = [((0, 0),(1, 0)), ((0, 1), (1, 1)), ((0, 2), (1, 2)), ((0, 0), (2, 0)), ((0, 1), (2, 1)), ((0, 2), (2, 2)), ((1, 0), (2, 0)), ((1, 1), (2, 1)), ((1, 2), (2, 2))]
 
-    for k, v in dictTemp.items():
-        for i in len(possibilities):
-            dictTemp[possibilities[0]] 
+    newDict = {}
 
-    # a = [correct, error]
+    for i in range(len(possibilities)):
+        if dictTemp[possibilities[i][0]] > dictTemp[possibilities[i][1]]:
+            # newDict[possibilities[i][0], (possibilities[i])] = dictTemp[possibilities[i][0]]
+            newDict[possibilities[i]] = dictTemp[possibilities[i][0]]
+        else:
+            # newDict[possibilities[i][1], (possibilities[i])] = dictTemp[possibilities[i][1]]
+            newDict[possibilities[i]] = dictTemp[possibilities[i][1]]
+
+    # print(newDict)
+
+    counter = 1
+
+    correct = 0
+    error = 0
+
+    # tempList = set()
+    # for ab in newDict.keys():
+    #     temp = list(ab)
+    #     # for a in range(len(temp)):
+    #     #     tempList.add(temp[a])
+    #
+    # tempList = sorted(tempList)
+    #
+    # matrixTempList = [[tempList[0], tempList[1], tempList[2]],
+    #                   [tempList[3], tempList[4], tempList[5]],
+    #                   [tempList[6], tempList[7]], tempList[8]]
+
+    # print(matrixTempList)
+
+    comparisons = [((0, 0), (1, 0)), ((0, 1), (1, 1))], \
+                  [((0, 0), (1, 0)), ((0, 2), (1, 2))], \
+                  [((0, 1), (1, 1)), ((0, 2), (1, 2))], \
+                  [((0, 0), (2, 0)), ((0, 1), (2, 1))], \
+                  [((0, 0), (2, 0)), ((0, 2), (2, 2))], \
+                  [((0, 1), (2, 1)), ((0, 2), (2, 2))], \
+                  [((1, 0), (2, 0)), ((1, 1), (2, 1))], \
+                  [((1, 0), (2, 0)), ((1, 2), (2, 2))], \
+                  [((1, 1), (2, 1)), ((1, 2), (2, 2))]
 
 
-    return a
+
+
+    counter = 1
+    for k, v in newDict.items():
+        # print(k[1][0])
+        for i in range(len(comparisons)):
+            tempOne = comparisons[i][0]
+            tempTwo = comparisons[i][1]
+
+            if newDict[tempOne] == newDict[tempTwo]:
+                correct += 1
+            else:
+                error += 1
+
+    # print("error: ", error)
+    # print("correct: ", correct)
+
+    error_percentage = (error / (error + correct)) * 100
+    return error_percentage
 ##################################################################
 dfTrain = load_data("HW2-TrainData.csv")
 dfTest = load_data("HW2-TestData.csv")
@@ -597,7 +650,7 @@ bayes = calc_bayes(X_test, X_norm, omega)
 print("Bayes: ", bayes, "\n")
 
 error = determineError(bayes, labels)
-print("Error: ", error)
+print("Error: {:1.2f}% ".format(error))
 
 # multivariate = calc_MultivariateDistribution(colDict_train, mean, covarianceMatrix, covarianceMatrixDeriv, 3, covariance, omega)
 # print("Multivariate: ", multivariate, "\n")
