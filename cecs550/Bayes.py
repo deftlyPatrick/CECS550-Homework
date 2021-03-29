@@ -584,20 +584,16 @@ def determineError(bayesResult: dict, labels):
                   [((1, 0), (2, 0)), ((1, 2), (2, 2))], \
                   [((1, 1), (2, 1)), ((1, 2), (2, 2))]
 
-
-
-
     counter = 1
-    for k, v in newDict.items():
-        # print(k[1][0])
-        for i in range(len(comparisons)):
-            tempOne = comparisons[i][0]
-            tempTwo = comparisons[i][1]
 
-            if newDict[tempOne] == newDict[tempTwo]:
-                correct += 1
-            else:
-                error += 1
+    for i in range(len(comparisons)):
+        tempOne = comparisons[i][0]
+        tempTwo = comparisons[i][1]
+
+        if newDict[tempOne] == newDict[tempTwo]:
+           correct += 1
+        else:
+            error += 1
 
     # print("error: ", error)
     # print("correct: ", correct)
