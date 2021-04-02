@@ -1,9 +1,10 @@
 import pandas as pd
 import numpy as np
 from sklearn.datasets import load_iris
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn import metrics
+from sklearn.model_selection import cross_val_score
+from sklearn import metrics, svm
 import random
 
 def init():
@@ -53,7 +54,18 @@ def KNeighborsClassifier_predict_prob(X, y, k, predict_proba=None):
 
     return predicted_prob
 
+def CrossValidation(X, y):
+    clf = svm.SVC(kernel='linear', C=100)
+    score = cross_val_score(clf, X, y)
 
+    return score
+
+def Optimizing(X, y):
+    parameters = {'kernel':('linear', 'rbf'), 'C':[1, 25]}
+    svc = svm.SVC()
+    clf = GridSearchCV(svc,parameters)
+
+    return clf.fit(X, y)
 
 X, y, k = init()
 
@@ -64,13 +76,15 @@ print("X_test: ", X_test, "\n\n")
 print("y_train: ", y_train, "\n\n")
 print("y_test: ", y_test, "\n\n")
 
-predictOne = pd.DataFrame(X_test).to_numpy()
-
-print(predictOne[0])
 fit_Train = KNeighborsClassifier_predict(X_train, y_train, X_test, y_test, k)
-# fit_Test = KNeighborsClassifier_temp(X_test, y_test, k, predict_number=1.1)
-
 print(fit_Train)
+
+score = CrossValidation(X_train, y_train)
+print(score)
+
+optimize = Optimizing(X_train, y_train)
+print(optimize)
+
 
 # train = KNeighborsClassifier_temp(X_train, y_train, k, predict_number=1.1)
 
