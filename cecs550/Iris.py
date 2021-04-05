@@ -46,7 +46,6 @@ def KNeighborsClassifier_predict(X_train, y_train, X_test, y_test, k):
 def KNeighborsClassifier_predict_prob(X, y, k, predict_proba=None):
 
     X = pd.DataFrame(X).to_numpy()
-    # X.reshape(1, -1)
     neigh = KNeighborsClassifier(n_neighbors=3)
     fit = neigh.fit(X, y)
     print(X)
@@ -54,16 +53,21 @@ def KNeighborsClassifier_predict_prob(X, y, k, predict_proba=None):
 
     return predicted_prob
 
-def CrossValidation(X, y):
+def CrossValidation(X, y, T):
     clf = svm.SVC(kernel='linear', C=100)
-    score = cross_val_score(clf, X, y)
+    score = cross_val_score(clf, X, y, cv=T)
 
     return score
 
-def Optimizing(X, y):
-    parameters = {'kernel':('linear', 'rbf'), 'C':[1, 25]}
+def Optimizing(X, y, R1, R2, T):
+
+    weight_options = ['uniform', 'distance']
+    k_range = list(range(R1,R2))
+    knn = KNeighborsClassifier(n_neighbors=T)
+    param_grid = dict(n_neighbors=k_range, weights=weight_options)
+    parameters = {'kernel':('linear', 'rbf'), 'C':[R1, R2]}
     svc = svm.SVC()
-    clf = GridSearchCV(svc,parameters)
+    clf = GridSearchCV(knn, param_grid, cv=T)
 
     return clf.fit(X, y)
 
@@ -79,10 +83,10 @@ print("y_test: ", y_test, "\n\n")
 fit_Train = KNeighborsClassifier_predict(X_train, y_train, X_test, y_test, k)
 print(fit_Train)
 
-score = CrossValidation(X_train, y_train)
+score = CrossValidation(X_train, y_train, T=5)
 print(score)
 
-optimize = Optimizing(X_train, y_train)
+optimize = Optimizing(X_train, y_train, R1=1, R2=25, T=5)
 print(optimize)
 
 
