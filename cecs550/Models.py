@@ -16,10 +16,11 @@ breast_cancer = pd.read_csv("breast-cancer-wisconsin.csv")
 
 df = pd.DataFrame(breast_cancer)
 new = df.replace({'?':np.nan}).dropna()
+new['BN'] = new['BN'].astype(str).astype('int64')
 new = new.drop('id', axis=1)
 new = new.dropna(axis='columns')
 
-print(new)
+# print(new)
 
 # print(new.columns)
 # print(len(new.columns))
@@ -30,16 +31,28 @@ for i in new.columns:
     labels.append(i)
 
 
-print(labels)
+# print(labels)
 
 new.index = pd.RangeIndex(len(new.index))
 new.index = range(len(new.index))
 
-for i in range(len(new)):
-    print(new.iloc[i][0])
+# for i in range(len(new)):
+#     print(new.iloc[i])
+
+print(new['BN'])
+print(new['CT'])
+print(new['UCSize'])
+
+counter = 0
+for i in range(len(new['CT'])):
+    # print("i:", i, " ", new['BN'][i])
+    if counter != i:
+        print("NO")
+    counter += 1
+# print(list(new.columns))
 
 # print(new.iloc[[]])
-boxplot = new.boxplot(['CT', 'UCSize', 'UCShape', 'MA', 'SECS', 'BC', 'NN', 'M', 'C'], showbox=True)
+# boxplot = new.boxplot(['CT', 'UCSize', 'UCShape', 'MA', 'SECS','BN', 'BC', 'NN', 'M', 'C'], showbox=True)
 plt.show()
 
 
