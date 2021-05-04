@@ -6,6 +6,7 @@ from matplotlib.colors import ListedColormap
 from sklearn.feature_selection import SelectKBest, chi2
 import os
 from sklearn import preprocessing
+from collections import defaultdict
 from sklearn.datasets import load_breast_cancer
 
 data = load_breast_cancer()
@@ -30,7 +31,6 @@ labels = []
 for i in new.columns:
     labels.append(i)
 
-
 # print(labels)
 
 new.index = pd.RangeIndex(len(new.index))
@@ -39,30 +39,55 @@ new.index = range(len(new.index))
 # for i in range(len(new)):
 #     print(new.iloc[i])
 
-print(new['BN'])
-print(new['CT'])
-print(new['UCSize'])
-
 counter = 0
 for i in range(len(new['CT'])):
     # print("i:", i, " ", new['BN'][i])
     if counter != i:
         print("NO")
     counter += 1
-# print(list(new.columns))
+print(len(new))
 
 # print(new.iloc[[]])
-# boxplot = new.boxplot(['CT', 'UCSize', 'UCShape', 'MA', 'SECS','BN', 'BC', 'NN', 'M', 'C'], showbox=True)
+boxplot = new.boxplot(['CT', 'UCSize', 'UCShape', 'MA', 'SECS','BN', 'BC', 'NN', 'M', 'C'], showbox=True)
 plt.show()
 
 
 
-# fig, ax = plt.subplots(figsize=(16,8))
-# ax.scatter(new['CT'], new['BN'])
-# plt.show()
-# removalOutlier = []
-# for i in range(len(df)):
-#     counter = 0
-#     counterTwo = 0
-#     for k in range(len(df[i])):
-#         if df[i][k] =
+# removalOutlier = defaultdict(list)
+#
+# for i in range(len(new)):
+#
+#     if new['MA'][i] > 8:
+#         removalOutlier[i].append(i)
+#
+#     if new['SECS'][i] > 7:
+#         removalOutlier[i].append(i)
+#
+#     if new['BC'][i] > 9:
+#         removalOutlier[i].append(i)
+#
+#     if new['NN'][i] > 8:
+#         removalOutlier[i].append(i)
+#
+#     if new['M'][i] > 1:
+#         removalOutlier[i].append(i)
+#
+
+removalOutlier = {}
+
+for i in range(len(new)):
+    if new['M'][i] > 9:
+        removalOutlier[i] = i
+
+    # if newRemoved['SECS'][i] > 3:
+    #     removalOutlier2[i] = i
+
+
+print(len(removalOutlier))
+
+newRemoved = new.drop(index=removalOutlier)
+newRemoved = newRemoved.reset_index(drop=True)
+print(newRemoved)
+
+boxplot = newRemoved.boxplot(['CT', 'UCSize', 'UCShape', 'MA', 'SECS','BN', 'BC', 'NN', 'M', 'C'], showbox=True)
+plt.show()
