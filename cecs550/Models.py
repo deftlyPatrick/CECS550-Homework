@@ -8,6 +8,8 @@ import os
 from sklearn import preprocessing
 from collections import defaultdict
 from sklearn.datasets import load_breast_cancer
+from sklearn.neighbors import KernelDensity
+
 
 data = load_breast_cancer()
 # print(len(data.target))
@@ -36,58 +38,83 @@ for i in new.columns:
 new.index = pd.RangeIndex(len(new.index))
 new.index = range(len(new.index))
 
-# for i in range(len(new)):
-#     print(new.iloc[i])
+# print(new)
 
-counter = 0
-for i in range(len(new['CT'])):
-    # print("i:", i, " ", new['BN'][i])
-    if counter != i:
-        print("NO")
-    counter += 1
-print(len(new))
-
-# print(new.iloc[[]])
-boxplot = new.boxplot(['CT', 'UCSize', 'UCShape', 'MA', 'SECS','BN', 'BC', 'NN', 'M', 'C'], showbox=True)
+boxplot = new.boxplot(['CT', 'UCSize', 'UCShape', 'MA','BN', 'BC', 'NN', 'C'], showbox=True)
 plt.show()
 
 
+benign = []
+malignant = []
+for i in new.itertuples():
+    temp = []
+    counter = 0
+    num = 0
+    for k in i:
+        if counter == 0:
+            counter += 1
+        elif counter == 10:
+            if k == 2:
+                num = 2
+                temp.append(k)
+            else:
+                num = 4
+                temp.append(k)
+        else:
+            temp.append(k)
+            counter += 1
+    if num == 2:
+        benign.append(temp)
+    else:
+        malignant.append(temp)
+# print(X)
 
-# removalOutlier = defaultdict(list)
-#
-# for i in range(len(new)):
-#
-#     if new['MA'][i] > 8:
-#         removalOutlier[i].append(i)
-#
-#     if new['SECS'][i] > 7:
-#         removalOutlier[i].append(i)
-#
-#     if new['BC'][i] > 9:
-#         removalOutlier[i].append(i)
-#
-#     if new['NN'][i] > 8:
-#         removalOutlier[i].append(i)
-#
-#     if new['M'][i] > 1:
-#         removalOutlier[i].append(i)
-#
+# print(len(benign))
+# print(len(malignant))
 
-removalOutlier = {}
+X_benign = np.asarray(benign, dtype=np.float32)
+# print(X_benign)
 
-for i in range(len(new)):
-    if new['M'][i] > 9:
-        removalOutlier[i] = i
+kde = KernelDensity(kernel='gaussian',bandwidth=0.2).fit(X_benign)
+scores_benign = kde.score_samples(X_benign)
 
-    # if newRemoved['SECS'][i] > 3:
-    #     removalOutlier2[i] = i
+X_malignant = np.asarray(malignant, dtype=np.float32)
+# print(X_malignant)
+
+kde = KernelDensity(kernel='gaussian',bandwidth=0.2).fit(X_malignant)
+scores_malignant = kde.score_samples(X_malignant)
 
 
-print(len(removalOutlier))
-
-newRemoved = new.drop(index=removalOutlier)
-newRemoved = newRemoved.reset_index(drop=True)
-print(newRemoved)
-
-boxplot = newRemoved.boxplot(['CT', 'UCSize', 'UCShape', 'MA', 'SECS','BN', 'BC', 'NN', 'M', 'C'], showbox=True)
+new_series = pd.Series(scores_malignant)
+ax = new_series.plot.kde()
+new_series = pd.Series(scores_benign)
+ax = new_series.plot.kde()
 plt.show()
+
+cols = list(new.columns)
+cols = [cols[-1]] + cols[:-1]
+new = new[cols]
+
+# print(new.columns)
+# print(new.describe())
+#
+# print(new['C'])
+datas = pd.DataFrame(preprocessing.minmax_scale(new.iloc[:,1:len(new.columns)]))
+datas.columns = list(new.iloc[:,1:len(new.columns)].columns)
+datas['C'] = new['C']
+# print(datas.shape)
+
+# print(datas.columns)
+
+features_mean = ['CT', 'UCSize', 'UCShape', 'MA', 'SECS', 'BN', 'BC', 'NN', 'M', 'C']
+plt.figure(figsize=(15,15))
+heat = sns.heatmap(datas[features_mean].corr(), vmax=1, square=True, annot=True)
+plt.show()
+
+X, y = datas, datas['C'].values
+
+print(X)
+
+X_new = SelectKBest(chi2).fit_transform(X, y)
+
+print(X_new)
