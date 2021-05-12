@@ -7,12 +7,10 @@ from sklearn.feature_selection import SelectKBest, chi2
 import os
 from sklearn import preprocessing
 from collections import defaultdict
-from sklearn.datasets import load_breast_cancer
 from sklearn.neighbors import KernelDensity
+from sklearn.decomposition import PCA
+import warnings
 
-
-data = load_breast_cancer()
-# print(len(data.target))
 
 breast_cancer = pd.read_csv("breast-cancer-wisconsin.csv")
 # print(breast_cancer)
@@ -113,8 +111,47 @@ plt.show()
 
 X, y = datas, datas['C'].values
 
-print(X)
+# print(X)
 
-X_new = SelectKBest(chi2).fit_transform(X, y)
+X_new = SelectKBest(chi2, k=1).fit_transform(X, y)
 
-print(X_new)
+# print(X_new)
+
+pca = PCA(n_components=2)
+
+principalComponents = pca.fit_transform(X,y)
+
+principalDf = pd.DataFrame(data=principalComponents, columns=['1', '2'])
+
+finalDf = pd.concat([principalDf, new[['C']]], axis=1)
+
+# print(finalDf)
+
+plt.xlabel('Category 1', fontsize=15)
+plt.ylabel('Category 2', fontsize=15)
+ax.set_title('PCA', fontsize=20)
+counterMalignant = 0
+counterBenign = 0
+for i in finalDf.itertuples():
+
+    if i[3] == 2:
+        color = 'r'
+        if counterMalignant == 0:
+            plt.scatter(i[1],i[2],c=color,label='malignant')
+            counterMalignant += 1
+        plt.scatter(i[1], i[2], c=color)
+    else:
+        color = 'b'
+        if counterBenign == 0:
+            plt.scatter(i[1],i[2],c=color,label='benign')
+            counterBenign += 1
+        plt.scatter(i[1], i[2], c=color)
+plt.legend(loc='upper center')
+plt.show()
+
+
+new_v = new.drop('C', axis=1)
+X, y = new_v, new['C'].values
+
+print(type(X))
+print(type(y))
