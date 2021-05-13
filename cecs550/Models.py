@@ -9,7 +9,11 @@ from sklearn import preprocessing
 from collections import defaultdict
 from sklearn.neighbors import KernelDensity
 from sklearn.decomposition import PCA
+import tensorflow as tf
 import warnings
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler
+from sklearn import tree
 
 
 breast_cancer = pd.read_csv("breast-cancer-wisconsin.csv")
@@ -153,5 +157,75 @@ plt.show()
 new_v = new.drop('C', axis=1)
 X, y = new_v, new['C'].values
 
-print(type(X))
-print(type(y))
+X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y)
+y_train = y_train.astype(int)
+y_test = y_test.astype(int)
+batch_size = len(X_train)
+
+scaler = MinMaxScaler()
+X_train_scaled = scaler.fit_transform(X_train.astype(np.float64))
+X_test_scaled = scaler.fit_transform(X_test.astype(np.float64))
+
+feature_columns = [tf.feature_column.numeric_column('x', shape=X_train_scaled.shape[1:])]
+
+print(tf.__version__)
+
+estimator = tf.estimator.DNNClassifier(
+    feature_columns=feature_columns,
+    hidden_units=[300, 100],
+    n_classes=10)
+
+train_input = tf.compat.v1.estimator.inputs.numpy_input_fn(
+    x={"x": X_train_scaled},
+    y=y_train,
+    batch_size=50,
+    shuffle=False,
+    num_epochs=None)
+
+estimator.train(input_fn=train_input,steps=1000)
+
+# print(type(X_test))
+# print(type(y_test))
+
+eval_input = tf.compat.v1.estimator.inputs.numpy_input_fn(
+    x={"x": X_test_scaled},
+    y=y_test,
+    shuffle=False,
+    batch_size=X_test_scaled.shape[0],
+    num_epochs=1)
+
+eval = estimator.evaluate(eval_input,steps=None)
+
+print(eval)
+
+clf = tree.DecisionTreeClassifier()
+
+# Fit regression model
+regr_1 = tree.DecisionTreeRegressor(max_depth=2)
+regr_2 = tree.DecisionTreeRegressor(max_depth=5)
+
+clf_train_1 = regr_1.fit(X_train, y_train)
+clf_train_2 = regr_2.fit(X_train, y_train)
+
+clf_test_1 = regr_1.fit(X_test, y_test)
+clf_test_2 = regr_2.fit(X_test, y_test)
+
+
+clf_train_1_fit = regr_1.fit(X, y)
+clf_train_2_fit = regr_2.fit(X, y)
+
+clf_test_1_fit = regr_1.fit(X, y)
+clf_test = regr_2.fit(X, y)
+
+# Predict
+y_1_train = regr_1.predict(X_train)
+y_2_train = regr_2.predict(X_train)
+
+y_1_test = regr_1.predict(X_test)
+y_2_test = regr_2.predict(X_test)
+
+print(y_1_train)
+print(y_2_train)
+
+print(y_1_test)
+print(y_2_test)
