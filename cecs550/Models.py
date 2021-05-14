@@ -7,6 +7,7 @@ from sklearn.feature_selection import SelectKBest, chi2
 import os
 from sklearn import preprocessing
 from collections import defaultdict
+from sklearn.metrics import mean_squared_error
 from sklearn.neighbors import KernelDensity
 from sklearn.decomposition import PCA
 import tensorflow as tf
@@ -224,8 +225,15 @@ y_2_train = regr_2.predict(X_train)
 y_1_test = regr_1.predict(X_test)
 y_2_test = regr_2.predict(X_test)
 
-print(y_1_train)
-print(y_2_train)
+# print(y_1_train)
+# print(y_2_train)
+#
+# print(y_1_test)
+# print(y_2_test)
 
-print(y_1_test)
-print(y_2_test)
+# Calculating Accuracy
+firstAccuracyScore = 1 - mean_squared_error(y_test, y_1_test)
+secondAccuracyScore = 1 - mean_squared_error(y_test, y_2_test)
+
+print(firstAccuracyScore)
+print(secondAccuracyScore)
